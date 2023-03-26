@@ -152,8 +152,16 @@ if __name__== '__main__':
             
             strategy = values['_strategy_']
 
-            switch = [values['long_switch'], values['short_switch']]
+            switch_val = [values['long_switch'], values['short_switch'], values['ma_switch'], values['noise_switch']]
             
+            switch = []
+            for val in switch_val:
+                if val == 'ON':
+                    v = 1
+                else:
+                    v = 0
+                switch.append(v)
+            print(switch)
             if values['sym'] == True:
                 # print(values['sym'])
                 table_name_list = table_name

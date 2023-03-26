@@ -91,6 +91,16 @@ def ma(df, row, ma_list):
 
 
 def make_data(df, ma_list, switch):
+    '''
+    switch = [values['long_switch'], values['short_switch'], values['ma_switch'], values['noise_switch']]
+    '''
+    
+    long_switch = switch[0]
+    short_switch = switch[1]
+    ma_switch = switch[2]
+    noise_switch = switch[3]
+    
+    
     # base factors
     df['range'] = df.high - df.low
     df['noise'] = (1 - abs(df.open - df.close) / df.range).round(decimals=3)
@@ -108,7 +118,9 @@ def make_data(df, ma_list, switch):
     df['s_target'] = df.open - df.range.shift(1) * df.s_break_ratio.shift(1)
 
     # 실행 조건 
-    # long_con1 = np.where()
+    long_con1 = np.where(df.close_ma_1.shift(1) <= df.close.shift(1), 1, 0)
+    long_con2 = np.where(df.noise_ma_2.shift(1) >= df.noise.shift(1), 1, 0)
+    long_con1 = np.where(df.close_ma_1.shift(1) <= df.close.shift(1), 1, 0)
 
     return df
 
