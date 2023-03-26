@@ -23,7 +23,7 @@ class Backtest():
         self.results = []
         
         # db에서 불러오기
-        all_dfs = uu.read_db(conn, table_name_list, start_time, end_time, candle_size, open_time, ma_list)
+        all_dfs = uu.read_db(conn, table_name_list, start_time, end_time, candle_size, open_time, ma_list, switch)
         
         # uu.data_processing(df_list)
         # self.results.append(df)
@@ -32,11 +32,15 @@ class Backtest():
         
         timer = now_end - now_start
         msg = f'>>>  Timer : {timer}'    
-        window['timer'].update(msg)
+        window['timer'].update(msg)    
+    
         
+    
+    
+            
 if __name__== '__main__':
     # Connect to the database file
-    conn = sqlite3.connect('D:\\db\\binance_futures.db')
+    conn = sqlite3.connect('db/binance_futures.db')
     cursor = conn.cursor()
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
     table_name  = [row[0] for row in cursor.fetchall()]
@@ -96,8 +100,8 @@ if __name__== '__main__':
     
     date_layout = [
         [sg.Text('Start Date '), 
-        sg.CalendarButton('Select', target='start_time', format='%Y-%m-%d 00:00:00'), 
-        sg.InputText(default_text=(datetime.now()-ago).strftime('%Y-%m-%d 00:00:00'), 
+            sg.CalendarButton('Select', target='start_time', format='%Y-%m-%d 00:00:00'), 
+            sg.InputText(default_text=(datetime.now()-ago).strftime('%Y-%m-%d 00:00:00'), 
                         key='start_time', size=(18, 1))],
         [sg.Text(' End Date '), 
             sg.CalendarButton('Select', target='end_time', format='%Y-%m-%d 00:00:00'),
@@ -115,17 +119,18 @@ if __name__== '__main__':
     strategy_layout = [
         [sg.Combo(values=strategy_list, size=(100,50), key='_strategy_', enable_events=True)],
         [sg.Text('Long '), sg.Combo(values=switch_list, default_value='ON', key='long_switch', enable_events=True)],
-        [sg.Text('Short'), sg.Combo(values=switch_list, default_value='OFF', key='short_switch', enable_events=True)],
-    ]
+        [sg.Text('Short'), sg.Combo(values=switch_list, default_value='OFF', key='short_switch', enable_events=True)],]
+
     
+
     layout = [
-        [sg.Frame('Time Set', date_layout, element_justification='center', size=(300,130)), 
-        sg.Frame('Crypto Set', symbols_layout, element_justification='center', size=(350,130)), 
-        sg.Frame('MA Set', ma_layout, element_justification='center', size=(240,130)), 
-        sg.Frame('MA Score Set', ma_score_layout, element_justification='center', size=(100,130)),
-        sg.Frame('Strategy', strategy_layout, element_justification='left', size=(180,130))],
+        [   sg.Frame('Time Set', date_layout, element_justification='center', size=(300,130)), 
+            sg.Frame('Crypto Set', symbols_layout, element_justification='center', size=(350,130)), 
+            sg.Frame('MA Set', ma_layout, element_justification='center', size=(240,130)), 
+            sg.Frame('MA Score Set', ma_score_layout, element_justification='center', size=(100,130)),
+            sg.Frame('Strategy', strategy_layout, element_justification='left', size=(180,130))],
         [sg.Button('Run Backtest'), sg.Text('>>>  ', key='timer', font='gothic15')],
-        [sg.Output(size=(250, 20))]
+        #[sg.Output(size=(200, 20))]
     ]
 
     window = sg.Window('ACTS Backtest', layout)
@@ -147,6 +152,8 @@ if __name__== '__main__':
             
             strategy = values['_strategy_']
 
+            switch = [values['long_switch'], values['short_switch']]
+            
             if values['sym'] == True:
                 # print(values['sym'])
                 table_name_list = table_name
@@ -176,7 +183,6 @@ if __name__== '__main__':
             #     print(f'{idx + 1}: {table_name_list[idx]} --------------------')
             #     print(result)
             #     print()
-            
     cursor.close()
     conn.close()
     window.close()
