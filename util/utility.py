@@ -1,6 +1,7 @@
 import pandas as pd
 import sqlite3
 import re
+import numpy as np
 from pprint import pprint as pp
 
 
@@ -53,7 +54,6 @@ def resample_df(df, candle_size, open_time, ma_list, switch):
             start = f'{o_time}h' 
             df = df.resample(period, offset=start).agg(values)
             
-            
             df = make_data(df, ma_list, switch)
             
             dfs.append(df)
@@ -73,7 +73,7 @@ def resample_df(df, candle_size, open_time, ma_list, switch):
 
 
 def ma(df, row, ma_list):
-    
+    num = 1
     for period in ma_list: 
         if period == '':
             p = 0
@@ -81,8 +81,9 @@ def ma(df, row, ma_list):
             p = int(period)
         
         if p > 0:
-            ma_name = f'{row}_ma_{p}'
+            ma_name = f'{row}_ma_{num}'
             df[ma_name] = df[row].rolling(window=p).mean().round(decimals=3)
+            num += 1
         else:
             pass
     
@@ -91,21 +92,23 @@ def ma(df, row, ma_list):
 
 def make_data(df, ma_list, switch):
     # base factors
-
-    
     df['range'] = df.high - df.low
     df['noise'] = (1 - abs(df.open - df.close) / df.range).round(decimals=3)
     
+    # 돌파 계수 설정
     df['l_break_ratio'] = df.noise * (1) # 전일 변동폭에 곱할 수: 노이즈에 뭘 곱할까? 고민 
     df['s_break_ratio'] = df.noise * (1)
 
+    # 이평선 만들기
     df = ma(df, 'close', ma_list)
     df = ma(df, 'noise', ma_list)
-       
+    
+    # 진입가격 설정
     df['l_target'] = df.open + df.range.shift(1) * df.l_break_ratio.shift(1)
     df['s_target'] = df.open - df.range.shift(1) * df.s_break_ratio.shift(1)
 
-    df = df[['range', 'l_break_ratio', 'l_target', 's_break_ratio', 's_target']]
+    # 실행 조건 
+    # long_con1 = np.where()
 
     return df
 

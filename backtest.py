@@ -40,11 +40,13 @@ class Backtest():
             
 if __name__== '__main__':
     # Connect to the database file
-    conn = sqlite3.connect('db/binance_futures.db')
+    conn = sqlite3.connect('D:\\db\\binance_futures.db')
     cursor = conn.cursor()
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
     table_name  = [row[0] for row in cursor.fetchall()]
     symbols     = [row[0][:-3] for row in cursor.fetchall()]
+    
+    
     
     
     candle_sizes = ['24', '12', '6', '4', '1']
@@ -61,41 +63,39 @@ if __name__== '__main__':
     ago = timedelta(days=30)
     # Create the PySimpleGUI window
     
+    sg.set_options(font=('nanumgothic', 10))
+    
     symbols_layout = [
         [sg.Checkbox('ALL CRYPTOS', key='sym')],
-        [   sg.Text('-'), sg.InputText(size=(5,5), key='sym1'), 
-            sg.Text('-'), sg.InputText(size=(5,5), key='sym2'), 
-            sg.Text('-'), sg.InputText(size=(5,5), key='sym3'), 
-            sg.Text('-'), sg.InputText(size=(5,5), key='sym4'), 
-            sg.Text('-'), sg.InputText(size=(5,5), key='sym5')], 
-        [   sg.Text('-'), sg.InputText(size=(5,5), key='sym6'), 
-            sg.Text('-'), sg.InputText(size=(5,5), key='sym7'), 
-            sg.Text('-'), sg.InputText(size=(5,5), key='sym8'), 
-            sg.Text('-'), sg.InputText(size=(5,5), key='sym9'), 
-            sg.Text('-'), sg.InputText(size=(5,5), key='sym10')]
+        [sg.Text('1'), sg.InputText(size=(5,3), font=('gothic', 10), key='sym1'), 
+        sg.Text('2'), sg.InputText(size=(5,3), font=('gothic', 10), key='sym2'),], 
+        [sg.Text('3'), sg.InputText(size=(5,3), font=('gothic', 10), key='sym3'), 
+        sg.Text('4'), sg.InputText(size=(5,3), font=('gothic', 10), key='sym4'),], 
+        [sg.Text('5'), sg.InputText(size=(5,3), font=('gothic', 10), key='sym5'), 
+        sg.Text('6'), sg.InputText(size=(5,3), font=('gothic', 10), key='sym6'),]
     ]
     
-
     ma_layout = [
         [sg.Text('Select MA')], 
-        [sg.Text('1'), sg.Combo(values=ma_list, default_value=3, key='ma_1', enable_events=True), 
-        sg.Text('2'), sg.Combo(values=ma_list, default_value=5, key='ma_2', enable_events=True),
-        sg.Text('3'), sg.Combo(values=ma_list, default_value=10, key='ma_3', enable_events=True)],
-        [sg.Text('4'), sg.Combo(values=ma_list, default_value=20, key='ma_4', enable_events=True),
-        sg.Text('5'), sg.Combo(values=ma_list, default_value=60, key='ma_5', enable_events=True),
-        sg.Text('6'), sg.Combo(values=ma_list, default_value=120, key='ma_6', enable_events=True)]
+        [sg.Text('1'), sg.Combo(values=ma_list, default_value=3, font=('gothic', 10), key='ma_1', enable_events=True), 
+        sg.Text('2'), sg.Combo(values=ma_list, default_value=5, font=('gothic', 10), key='ma_2', enable_events=True),],
+        [sg.Text('3'), sg.Combo(values=ma_list, default_value=10, font=('gothic', 10), key='ma_3', enable_events=True),
+        sg.Text('4'), sg.Combo(values=ma_list, default_value=20, font=('gothic', 10), key='ma_4', enable_events=True),],
+        [sg.Text('5'), sg.Combo(values=ma_list, default_value=60, font=('gothic', 10), key='ma_5', enable_events=True),
+        sg.Text('6'), sg.Combo(values=ma_list, default_value=120, font=('gothic', 10), key='ma_6', enable_events=True)]
     ]
     
     ma_score_layout = [
-        [sg.Text('1'), sg.Combo(values=ma_score_list, default_value=60, key='ma_score_1', enable_events=True)],
-        [sg.Text('2'), sg.Combo(values=ma_score_list, default_value=30, key='ma_score_2', enable_events=True)],
-        [sg.Text('3'), sg.Combo(values=ma_score_list, default_value=5, key='ma_score_3', enable_events=True)],
-        [sg.Text('4'), sg.Combo(values=ma_score_list, default_value=5, key='ma_score_4', enable_events=True)],
+        [sg.Text('1'), sg.Combo(values=ma_score_list, default_value=60, font=('gothic', 10), key='ma_score_1', enable_events=True)],
+        [sg.Text('2'), sg.Combo(values=ma_score_list, default_value=30, font=('gothic', 10), key='ma_score_2', enable_events=True)],
+        [sg.Text('3'), sg.Combo(values=ma_score_list, default_value=5, font=('gothic', 10), key='ma_score_3', enable_events=True)],
+        [sg.Text('4'), sg.Combo(values=ma_score_list, default_value=5, font=('gothic', 10), key='ma_score_4', enable_events=True)],
     ]
     
-    switch_layout = [
-        [sg.Text(' Long'), sg.Combo(values=switch_list, default_value='ON', key='long_switch', enable_events=True)],
-        [sg.Text('Short'), sg.Combo(values=switch_list, default_value='OFF', key='short_switch', enable_events=True)],
+    
+    filter_layout = [
+        [sg.Text('MA_F'), sg.Combo(values=switch_list, default_value='ON', key='ma_switch', enable_events=True),
+        sg.Text('NOISE_F'), sg.Combo(values=switch_list, default_value='ON', key='noise_switch', enable_events=True)],
     ]
     
     date_layout = [
@@ -119,20 +119,20 @@ if __name__== '__main__':
     strategy_layout = [
         [sg.Combo(values=strategy_list, size=(100,50), key='_strategy_', enable_events=True)],
         [sg.Text('Long '), sg.Combo(values=switch_list, default_value='ON', key='long_switch', enable_events=True)],
-        [sg.Text('Short'), sg.Combo(values=switch_list, default_value='OFF', key='short_switch', enable_events=True)],]
-
+        [sg.Text('Short'), sg.Combo(values=switch_list, default_value='OFF', key='short_switch', enable_events=True)],
+    ]
     
-
     layout = [
-        [   sg.Frame('Time Set', date_layout, element_justification='center', size=(300,130)), 
-            sg.Frame('Crypto Set', symbols_layout, element_justification='center', size=(350,130)), 
-            sg.Frame('MA Set', ma_layout, element_justification='center', size=(240,130)), 
-            sg.Frame('MA Score Set', ma_score_layout, element_justification='center', size=(100,130)),
-            sg.Frame('Strategy', strategy_layout, element_justification='left', size=(180,130))],
-        [sg.Button('Run Backtest'), sg.Text('>>>  ', key='timer', font='gothic15')],
+        [   sg.Frame('Time Set', date_layout, element_justification='center', title_color='yellowgreen', size=(300,130)), 
+            sg.Frame('Crypto Set', symbols_layout, element_justification='center', title_color='yellowgreen', size=(160,130)), 
+            sg.Frame('MA Set', ma_layout, element_justification='center', title_color='yellowgreen', size=(170,130)), 
+            sg.Frame('MA Score Set', ma_score_layout, element_justification='center', title_color='yellowgreen', size=(90,130)),
+            sg.Frame('Strategy', strategy_layout, element_justification='left', title_color='yellowgreen', size=(180,130))],
+        [sg.Frame('Filters', filter_layout, element_justification='left', title_color='darkorange', size=(600,50))],
+        [sg.Button('Run Backtest'), sg.Text('>>>  ', key='timer', font=('gothic', 12))],
         #[sg.Output(size=(200, 20))]
     ]
-
+    
     window = sg.Window('ACTS Backtest', layout)
     
     while True:
@@ -162,9 +162,8 @@ if __name__== '__main__':
                 
             else:
                 table_name_list = []
-                symbol_list = [values['sym1'], values['sym2'], values['sym3'], values['sym4'], 
-                                values['sym5'], values['sym6'], values['sym7'], values['sym8'], 
-                                values['sym9'], values['sym10']]
+                symbol_list = [values['sym1'], values['sym2'], values['sym3'], 
+                            values['sym4'], values['sym5'], values['sym6'],]
                 for sym in symbol_list:
                     if sym != '':
                         s = f'{sym}USDT_1h'
