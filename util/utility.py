@@ -4,11 +4,40 @@ import re
 import numpy as np
 from pprint import pprint as pp
 
+'''
+values_list = [
+0    values['start_time'], 
+1    values['end_time'], 
+2    values['candle_size'], 
+3    values['open_time'],
+4    values['ma_1'], 
+5    values['ma_2'], 
+6    values['ma_3'], 
+7    values['ma_4'], 
+8    values['ma_5'], 
+9    values['ma_6'],
+10    values['ma_score_1'], 
+11    values['ma_score_2'], 
+12    values['ma_score_3'], 
+13    values['ma_score_4'], 
+14    values['sep_cm1'], 
+15    values['sep_m1m2'], 
+16    values['sep_m2m3'], 
+17    values['sep_m3m4'],
+
+
+]
+'''
+
 
 # Read DB
-def read_db(conn, table_name_list, start_time, end_time, candle_size, open_time, ma_list, switch):
+def read_db(conn, table_name_list, values_list, switch):
     cnt = 1
     all_dfs = []
+    start_time = values_list[0]
+    end_time = values_list[1]
+    candle_size = values_list[2]
+    open_time = values_list[3]
     for table_name in table_name_list:
         
         print('_________________________________')
@@ -23,7 +52,7 @@ def read_db(conn, table_name_list, start_time, end_time, candle_size, open_time,
         
         df['timestamp'] = pd.to_datetime(df['timestamp'])
         df = df.set_index('timestamp', inplace=False)
-        dfs = resample_df(df, candle_size, open_time, ma_list, switch)
+        dfs = resample_df(df, values_list[2], values_list[3], values_list, switch)
         all_dfs.append(dfs)
         pp(dfs)
         
@@ -33,9 +62,12 @@ def read_db(conn, table_name_list, start_time, end_time, candle_size, open_time,
 
 
 # Candle Resample
-def resample_df(df, candle_size, open_time, ma_list, switch):
+def resample_df(df, candle_size, open_time, values_list, switch):
     print('>>> Resample DataFrame')
     
+    ma_list = values_list[4:9]
+    ma_score_list = values_list[10:13]
+
     values = {
                 'open': 'first', 
                 'high': 'max', 
@@ -54,7 +86,7 @@ def resample_df(df, candle_size, open_time, ma_list, switch):
             start = f'{o_time}h' 
             df = df.resample(period, offset=start).agg(values)
             
-            df = make_data(df, ma_list, switch)
+            df = make_data(df, ma_list,  ma_score_list, switch)
             
             dfs.append(df)
             
@@ -63,7 +95,7 @@ def resample_df(df, candle_size, open_time, ma_list, switch):
         start = f'{open_time}h' 
         df = df.resample(period, offset=start).agg(values)
         
-        df = make_data(df, ma_list, switch)
+        df = make_data(df, ma_list, ma_score_list, switch)
         
         dfs.append(df)
     
@@ -90,15 +122,20 @@ def ma(df, row, ma_list):
     return df
 
 
-def make_data(df, ma_list, switch):
+def make_data(df, ma_list, ma_score_list, switch):
     '''
     switch = [values['long_switch'], values['short_switch'], values['ma_switch'], values['noise_switch']]
     '''
     
-    long_switch = switch[0]
-    short_switch = switch[1]
-    ma_switch = switch[2]
-    noise_switch = switch[3]
+    ma_s_1 = ma_score_list[0]
+    ma_s_2 = ma_score_list[1]
+    ma_s_3 = ma_score_list[2]
+    ma_s_4 = ma_score_list[3]
+
+    long_switch   = switch[0]
+    short_switch  = switch[1]
+    ma_switch     = switch[2]
+    noise_switch  = switch[3]
     
     
     # base factors
@@ -113,10 +150,37 @@ def make_data(df, ma_list, switch):
     df = ma(df, 'close', ma_list)
     df = ma(df, 'noise', ma_list)
     
+    # 이격도
+    seperation_c_m1  = df.close.shift(1) / df.close_ma_1.shift(1) - 1
+    seperation_m1_m2 = df.close_ma_1.shift(1) / df.close_ma_2.shift(1) - 1
+    seperation_m2_m3 = df.close_ma_2.shift(1) / df.close_ma_3.shift(1) - 1
+    seperation_m3_m4 = df.close_ma_3.shift(1) / df.close_ma_4.shift(1) - 1
+
+
+
+
+
     # 진입가격 설정
     df['l_target'] = df.open + df.range.shift(1) * df.l_break_ratio.shift(1)
     df['s_target'] = df.open - df.range.shift(1) * df.s_break_ratio.shift(1)
 
+    # 배팅비율 
+    ma_1_long_score  = np.where(df.close_ma_1.shift(1) <= df.close.shift(1), ma_s_1, 0)
+    ma_2_long_score  = np.where(df.close_ma_2.shift(1) <= df.close.shift(1), ma_s_2, 0)
+    ma_3_long_score  = np.where(df.close_ma_3.shift(1) <= df.close.shift(1), ma_s_3, 0)
+    ma_4_long_score  = np.where(df.close_ma_4.shift(1) <= df.close.shift(1), ma_s_4, 0)
+
+    ma_1_short_score = np.where(df.close_ma_1.shift(1) >= df.close.shift(1), ma_s_1, 0)
+    ma_2_short_score = np.where(df.close_ma_2.shift(1) >= df.close.shift(1), ma_s_2, 0)
+    ma_3_short_score = np.where(df.close_ma_3.shift(1) >= df.close.shift(1), ma_s_3, 0)
+    ma_4_short_score = np.where(df.close_ma_4.shift(1) >= df.close.shift(1), ma_s_4, 0)
+    
+    ma_score_long    = np.mean(ma_1_long_score + ma_2_long_score + ma_3_long_score + ma_4_long_score)
+    ma_score_short   = np.mean(ma_1_short_score + ma_2_short_score + ma_3_short_score + ma_4_short_score)
+
+
+
+    
     # 실행 조건 
     long_con1 = np.where(df.close_ma_1.shift(1) <= df.close.shift(1), 1, 0)
     long_con2 = np.where(df.noise_ma_2.shift(1) >= df.noise.shift(1), 1, 0)

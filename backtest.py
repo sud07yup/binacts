@@ -17,13 +17,11 @@ class Backtest():
     def __init__(self):
         now_start = datetime.now()        
         # Define the timestamps you want to retrieve values between
-        self.start_time = start_time
-        self.end_time   = end_time
-        
+                
         self.results = []
         
         # db에서 불러오기
-        all_dfs = uu.read_db(conn, table_name_list, start_time, end_time, candle_size, open_time, ma_list, switch)
+        all_dfs = uu.read_db(conn, table_name_list, values_list, switch)
         
         # uu.data_processing(df_list)
         # self.results.append(df)
@@ -40,7 +38,7 @@ class Backtest():
             
 if __name__== '__main__':
     # Connect to the database file
-    conn = sqlite3.connect('D:\\db\\binance_futures.db')
+    conn = sqlite3.connect('C:\\coding\db\\binance_futures.db')
     cursor = conn.cursor()
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
     table_name  = [row[0] for row in cursor.fetchall()]
@@ -92,10 +90,20 @@ if __name__== '__main__':
         [sg.Text('4'), sg.Combo(values=ma_score_list, default_value=5, font=('gothic', 10), key='ma_score_4', enable_events=True)],
     ]
     
+    seperation_ratio_layout = [
+        [sg.Text('c/m1'), sg.Combo(values=ma_score_list, default_value=60, font=('gothic', 10), key='sep_cm1', enable_events=True)],
+        [sg.Text('m1/m2'), sg.Combo(values=ma_score_list, default_value=60, font=('gothic', 10), key='sep_m1m2', enable_events=True)],
+        [sg.Text('m2/m3'), sg.Combo(values=ma_score_list, default_value=60, font=('gothic', 10), key='sep_m2m3', enable_events=True)],
+        [sg.Text('m3/m4'), sg.Combo(values=ma_score_list, default_value=60, font=('gothic', 10), key='sep_m3m4', enable_events=True)],
+
+
+    ]
+
     
     filter_layout = [
         [sg.Text('MA_F'), sg.Combo(values=switch_list, default_value='ON', key='ma_switch', enable_events=True),
-        sg.Text('NOISE_F'), sg.Combo(values=switch_list, default_value='ON', key='noise_switch', enable_events=True)],
+        sg.Text('NOISE_F'), sg.Combo(values=switch_list, default_value='ON', key='noise_switch', enable_events=True),
+        sg.Text('SEPER_F'), sg.Combo(values=switch_list, default_value='ON', key='seperation_switch', enable_events=True)],
     ]
     
     date_layout = [
@@ -107,6 +115,7 @@ if __name__== '__main__':
             sg.CalendarButton('Select', target='end_time', format='%Y-%m-%d 00:00:00'),
             sg.InputText(default_text=datetime.now().strftime('%Y-%m-%d 00:00:00'), 
                         key='end_time', size=(18, 1))],
+        [sg.Text('')],
         [sg.Text('Candle Size:'), 
             sg.Combo(values=candle_sizes, default_value=candle_sizes[0], 
                     key='candle_size', enable_events=True),
@@ -141,19 +150,23 @@ if __name__== '__main__':
         if event == sg.WINDOW_CLOSED:
             break
         
-        if event == 'Run Backtest':
-            start_time  = values['start_time']
-            end_time    = values['end_time']
-            candle_size = values['candle_size']
-            open_time   = values['open_time']
-            
-            ma_list = [values['ma_1'], values['ma_2'], values['ma_3'], 
-                        values['ma_4'], values['ma_5'], values['ma_6']]
-            
+        if event == 'Run Backtest':           
             strategy = values['_strategy_']
 
-            switch_val = [values['long_switch'], values['short_switch'], values['ma_switch'], values['noise_switch']]
+            values_list = [
+                values['start_time'], values['end_time'], values['candle_size'], values['open_time'],
+                values['ma_1'], values['ma_2'], values['ma_3'], values['ma_4'], values['ma_5'], values['ma_6'],
+                values['ma_score_1'], values['ma_score_2'], values['ma_score_3'], values['ma_score_4'], 
+                values['sep_cm1'], values['sep_m1m2'], values['sep_m2m3'], values['sep_m3m4'],
+            ]
             
+            
+            switch_val    = [values['long_switch'], values['short_switch'], 
+                            values['ma_switch'], values['noise_switch'], 
+                            values['seperation_switch']]
+            
+
+
             switch = []
             for val in switch_val:
                 if val == 'ON':
