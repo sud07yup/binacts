@@ -52,7 +52,7 @@ def read_db(conn, table_name_list, values_list, switch):
         
         df['timestamp'] = pd.to_datetime(df['timestamp'])
         df = df.set_index('timestamp', inplace=False)
-        dfs = resample_df(df, values_list[2], values_list[3], values_list, switch)
+        dfs = resample_df(df, candle_size, open_time, values_list, switch)
         all_dfs.append(dfs)
         pp(dfs)
         
@@ -65,9 +65,6 @@ def read_db(conn, table_name_list, values_list, switch):
 def resample_df(df, candle_size, open_time, values_list, switch):
     print('>>> Resample DataFrame')
     
-    ma_list = values_list[4:9]
-    ma_score_list = values_list[10:13]
-
     values = {
                 'open': 'first', 
                 'high': 'max', 
@@ -86,7 +83,7 @@ def resample_df(df, candle_size, open_time, values_list, switch):
             start = f'{o_time}h' 
             df = df.resample(period, offset=start).agg(values)
             
-            df = make_data(df, ma_list,  ma_score_list, switch)
+            df = make_data(df, values_list, switch)
             
             dfs.append(df)
             
@@ -95,7 +92,7 @@ def resample_df(df, candle_size, open_time, values_list, switch):
         start = f'{open_time}h' 
         df = df.resample(period, offset=start).agg(values)
         
-        df = make_data(df, ma_list, ma_score_list, switch)
+        df = make_data(df, values_list, switch)
         
         dfs.append(df)
     
@@ -122,22 +119,28 @@ def ma(df, row, ma_list):
     return df
 
 
-def make_data(df, ma_list, ma_score_list, switch):
+def make_data(df, values_list, switch):
     '''
     switch = [values['long_switch'], values['short_switch'], values['ma_switch'], values['noise_switch']]
     '''
+    ma_list = values_list[4:10]
     
-    ma_s_1 = ma_score_list[0]
-    ma_s_2 = ma_score_list[1]
-    ma_s_3 = ma_score_list[2]
-    ma_s_4 = ma_score_list[3]
+    ma_s_1 = values_list[10]
+    ma_s_2 = values_list[11]
+    ma_s_3 = values_list[12]
+    ma_s_4 = values_list[13]
+
+    sep_base_cm1    = values_list[14]
+    sep_base_m1m2   = values_list[15]
+    sep_base_m2m3   = values_list[16]
+    sep_base_m4m4   = values_list[17]
 
     long_switch   = switch[0]
     short_switch  = switch[1]
     ma_switch     = switch[2]
     noise_switch  = switch[3]
-    
-    
+    sep_switch    = switch[4]
+        
     # base factors
     df['range'] = df.high - df.low
     df['noise'] = (1 - abs(df.open - df.close) / df.range).round(decimals=3)
@@ -157,14 +160,13 @@ def make_data(df, ma_list, ma_score_list, switch):
     seperation_m3_m4 = df.close_ma_3.shift(1) / df.close_ma_4.shift(1) - 1
 
 
-
-
-
     # 진입가격 설정
     df['l_target'] = df.open + df.range.shift(1) * df.l_break_ratio.shift(1)
     df['s_target'] = df.open - df.range.shift(1) * df.s_break_ratio.shift(1)
 
-    # 배팅비율 
+    # 배팅비율
+    # 이평선 스코어 
+    score_sum = ma_s_1 + ma_s_2 + ma_s_3 + ma_s_4
     ma_1_long_score  = np.where(df.close_ma_1.shift(1) <= df.close.shift(1), ma_s_1, 0)
     ma_2_long_score  = np.where(df.close_ma_2.shift(1) <= df.close.shift(1), ma_s_2, 0)
     ma_3_long_score  = np.where(df.close_ma_3.shift(1) <= df.close.shift(1), ma_s_3, 0)
@@ -174,11 +176,16 @@ def make_data(df, ma_list, ma_score_list, switch):
     ma_2_short_score = np.where(df.close_ma_2.shift(1) >= df.close.shift(1), ma_s_2, 0)
     ma_3_short_score = np.where(df.close_ma_3.shift(1) >= df.close.shift(1), ma_s_3, 0)
     ma_4_short_score = np.where(df.close_ma_4.shift(1) >= df.close.shift(1), ma_s_4, 0)
-    
-    ma_score_long    = np.mean(ma_1_long_score + ma_2_long_score + ma_3_long_score + ma_4_long_score)
-    ma_score_short   = np.mean(ma_1_short_score + ma_2_short_score + ma_3_short_score + ma_4_short_score)
+
+    # 이격도 스코어  -  수정필요
+    sep_1_long_score = np.where((seperation_c_m1 <= sep_base_cm1), 100, 50)
+    df['ss'] = sep_1_long_score
 
 
+    long_bat_score_1    = (ma_1_long_score + ma_2_long_score + ma_3_long_score + ma_4_long_score) / score_sum
+    short_bat_score_1   = (ma_1_short_score + ma_2_short_score + ma_3_short_score + ma_4_short_score) / score_sum
+
+   
 
     
     # 실행 조건 

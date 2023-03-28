@@ -91,10 +91,10 @@ if __name__== '__main__':
     ]
     
     seperation_ratio_layout = [
-        [sg.Text('c/m1'), sg.Combo(values=ma_score_list, default_value=60, font=('gothic', 10), key='sep_cm1', enable_events=True)],
-        [sg.Text('m1/m2'), sg.Combo(values=ma_score_list, default_value=60, font=('gothic', 10), key='sep_m1m2', enable_events=True)],
-        [sg.Text('m2/m3'), sg.Combo(values=ma_score_list, default_value=60, font=('gothic', 10), key='sep_m2m3', enable_events=True)],
-        [sg.Text('m3/m4'), sg.Combo(values=ma_score_list, default_value=60, font=('gothic', 10), key='sep_m3m4', enable_events=True)],
+        [sg.Text('c/m1'), sg.Combo(values=ma_score_list, default_value=5, font=('gothic', 10), key='sep_cm1', enable_events=True)],
+        [sg.Text('m1/m2'), sg.Combo(values=ma_score_list, default_value=10, font=('gothic', 10), key='sep_m1m2', enable_events=True)],
+        [sg.Text('m2/m3'), sg.Combo(values=ma_score_list, default_value=20, font=('gothic', 10), key='sep_m2m3', enable_events=True)],
+        [sg.Text('m3/m4'), sg.Combo(values=ma_score_list, default_value=30, font=('gothic', 10), key='sep_m3m4', enable_events=True)],
 
 
     ]
@@ -135,8 +135,9 @@ if __name__== '__main__':
         [   sg.Frame('Time Set', date_layout, element_justification='center', title_color='yellowgreen', size=(300,130)), 
             sg.Frame('Crypto Set', symbols_layout, element_justification='center', title_color='yellowgreen', size=(160,130)), 
             sg.Frame('MA Set', ma_layout, element_justification='center', title_color='yellowgreen', size=(170,130)), 
-            sg.Frame('MA Score Set', ma_score_layout, element_justification='center', title_color='yellowgreen', size=(90,130)),
-            sg.Frame('Strategy', strategy_layout, element_justification='left', title_color='yellowgreen', size=(180,130))],
+            sg.Frame('MA Score Set', ma_score_layout, element_justification='center', title_color='yellowgreen', size=(90,130)), 
+            sg.Frame('Seperation', seperation_ratio_layout, element_justification='right', title_color='yellowgreen', size=(110,130)),
+            sg.Frame('Strategy', strategy_layout, element_justification='left', title_color='yellowgreen', size=(180,130)),],
         [sg.Frame('Filters', filter_layout, element_justification='left', title_color='darkorange', size=(600,50))],
         [sg.Button('Run Backtest'), sg.Text('>>>  ', key='timer', font=('gothic', 12))],
         #[sg.Output(size=(200, 20))]
