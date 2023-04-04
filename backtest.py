@@ -63,18 +63,26 @@ if __name__== '__main__':
             strategy = values['_strategy_']
 
             values_list = [
-                values['start_time'], values['end_time'], values['candle_size'], values['open_time'],
-                values['ma_1'], values['ma_2'], values['ma_3'], values['ma_4'], values['ma_5'], values['ma_6'],
-                values['ma_score_1'], values['ma_score_2'], values['ma_score_3'], values['ma_score_4'], 
-                values['sep_cm1'], values['sep_m1m2'], values['sep_m2m3'], values['sep_m3m4'],
+                values['start_time'], values['end_time'], 
+                values['candle_size'], values['open_time'],
+                values['ma_1'], values['ma_2'], values['ma_3'], 
+                values['ma_4'], values['ma_5'], values['ma_6'],
+                values['ma_score_1'], values['ma_score_2'], 
+                values['ma_score_3'], values['ma_score_4'], 
+                values['sep_cm1'], values['sep_cm2'], 
+                values['sep_cm3'], values['sep_cm4'],
+                values['sep_score_1'], values['sep_score_2'], 
+                values['sep_score_3'], values['sep_score_4']
             ]
                         
             switch_val  = [
                 values['long_switch'], values['short_switch'], 
-                values['ma_switch'], values['noise_switch'], 
+                values['ma_switch'], values['ma_switch'],  
                 values['seperation_switch'],
             ]
-            
+            # values['noise_switch']
+
+
             switch = []
             for val in switch_val:
                 if val == 'ON':

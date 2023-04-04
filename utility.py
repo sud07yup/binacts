@@ -21,9 +21,13 @@ values_list = [
 12    values['ma_score_3'], 
 13    values['ma_score_4'], 
 14    values['sep_cm1'], 
-15    values['sep_m1m2'], 
-16    values['sep_m2m3'], 
-17    values['sep_m3m4'],
+15    values['sep_cm2'], 
+16    values['sep_cm3'], 
+17    values['sep_cm4'],
+18    values['sep_score_1'], 
+19    values['sep_score_2'], 
+20    values['sep_score_3'], 
+21    values['sep_score_4']
 
 
 ]
@@ -131,9 +135,14 @@ def make_data(df, values_list, switch):
     ma_s_4 = values_list[13]
 
     sep_base_cm1  = values_list[14]
-    sep_base_m1m2 = values_list[15]
-    sep_base_m2m3 = values_list[16]
-    sep_base_m4m4 = values_list[17]
+    sep_base_cm2 = values_list[15]
+    sep_base_cm3 = values_list[16]
+    sep_base_cm4 = values_list[17]
+
+    sep_score_1  = values_list[18]
+    sep_score_2  = values_list[19]
+    sep_score_3  = values_list[20]
+    sep_score_4  = values_list[21] 
 
     long_switch   = switch[0]
     short_switch  = switch[1]
@@ -154,10 +163,10 @@ def make_data(df, values_list, switch):
     df = ma(df, 'noise', ma_list)
     
     # 이격도
-    seperation_c_m1  = df.close.shift(1) / df.close_ma_1.shift(1) - 1
-    seperation_m1_m2 = df.close_ma_1.shift(1) / df.close_ma_2.shift(1) - 1
-    seperation_m2_m3 = df.close_ma_2.shift(1) / df.close_ma_3.shift(1) - 1
-    seperation_m3_m4 = df.close_ma_3.shift(1) / df.close_ma_4.shift(1) - 1
+    seperation_cm1  = df.close.shift(1) / df.close_ma_1.shift(1) - 1
+    seperation_cm2 = df.close.shift(1) / df.close_ma_2.shift(1) - 1
+    seperation_cm3 = df.close.shift(1) / df.close_ma_3.shift(1) - 1
+    seperation_cm4 = df.close.shift(1) / df.close_ma_4.shift(1) - 1
 
 
     # 진입가격 설정
@@ -178,7 +187,11 @@ def make_data(df, values_list, switch):
     ma_4_short_score = np.where(df.close_ma_4.shift(1) >= df.close.shift(1), ma_s_4, 0)
 
     # 이격도 스코어  -  수정필요
-    sep_1_long_score = np.where((seperation_c_m1 <= float(sep_base_cm1)/100), 100, 50)
+    sep_1_long_score = np.where((seperation_cm1 <= float(sep_base_cm1)/100), sep_score_1, 0)
+    sep_2_long_score = np.where((seperation_cm2 <= float(sep_base_cm2)/100), sep_score_2, 0)
+    sep_3_long_score = np.where((seperation_cm3 <= float(sep_base_cm3)/100), sep_score_3, 0)
+    sep_4_long_score = np.where((seperation_cm4 <= float(sep_base_cm4)/100), sep_score_4, 0)
+
     df['ss'] = sep_1_long_score
 
 
