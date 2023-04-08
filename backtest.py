@@ -73,7 +73,7 @@ if __name__== '__main__':
                 values['sep_cm3'], values['sep_cm4'],
                 values['sep_score_1'], values['sep_score_2'], 
                 values['sep_score_3'], values['sep_score_4'],
-                values['selected_noise']
+                values['aggression'], values['selected_noise']
             ]
                         
             switch_val  = [

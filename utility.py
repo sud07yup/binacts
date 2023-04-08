@@ -28,7 +28,8 @@ values_list = [
 19    values['sep_score_2'], 
 20    values['sep_score_3'], 
 21    values['sep_score_4'],
-22    values['selected_noise']
+22    values['aggression'],
+23    values['selected_noise']
 
 ]
 '''
@@ -151,7 +152,8 @@ def make_data(df, values_list, switch):
     sep_score_3  = values_list[20]
     sep_score_4  = values_list[21] 
 
-    select_noise = values_list[22]
+    aggression   = values_list[22]
+    select_noise = values_list[23]
 
     long_switch        = switch[0]
     short_switch       = switch[1]
