@@ -72,29 +72,44 @@ if __name__== '__main__':
                 values['sep_cm1'], values['sep_cm2'], 
                 values['sep_cm3'], values['sep_cm4'],
                 values['sep_score_1'], values['sep_score_2'], 
-                values['sep_score_3'], values['sep_score_4']
+                values['sep_score_3'], values['sep_score_4'],
+                values['selected_noise']
             ]
                         
             switch_val  = [
                 values['long_switch'], values['short_switch'], 
-                values['ma_switch'], values['ma_switch'],  
+                values['ma_switch'], 
                 values['seperation_switch'],
+                values['system_noise'], values['select_noise']
             ]
-            # values['noise_switch']
-
+            
 
             switch = []
             for val in switch_val:
                 if val == 'ON':
                     v = 1
+                elif val == True:
+                    v = 1
                 else:
                     v = 0
                 switch.append(v)
+            
+            if switch[4] + switch[5] == 2:
+                print('>> You choose 2 noise types. Choose only one noise type')
+                continue
+
+            elif switch[4] + switch[5] == 0:
+                print('>> You did not choose noise type. Choose 1 type.')
+                continue
+
+            else:
+                pass
+
             print(switch)
+            
             if values['sym'] == True:
                 # print(values['sym'])
                 table_name_list = table_name
-                
                  
             else:
                 table_name_list = []

@@ -8,8 +8,10 @@ open_times   = ['All', '0', '1', '2', '3', '4', '5', '6', '7',
                 '8', '9', '10', '11', '12', '13', '14', '15', 
                 '16', '17', '18', '19', '20', '21', '22', '23']
     
-ma_list         = list(range(0, 241))
-score_list   = list(range(0, 100, 5))
+ma_list    = list(range(0, 241))
+score_list = list(range(0, 105, 5))
+noise_list = list(range(0, 105, 5))
+
 
 switch_list = ['ON', 'OFF']
 
@@ -29,9 +31,18 @@ symbols_layout = [
     [sg.Text('6'), sg.InputText(size=(5,3), font=('gothic', 10), key='sym6')]
 ]
 
+noise_layout = [
+
+    [sg.Checkbox('System Value', key='system_noise'), 
+    sg.Text('-Appli_Rate(%)'), sg.Combo(values=noise_list, default_value=100, font=('gothic', 10), key='aggression'),],
+    [sg.Checkbox('Select Noise(%)', key='select_noise'), 
+    sg.Combo(values=noise_list, default_value=50, font=('gothic', 10), key='selected_noise')],
+]
+
+
 # 이평선 선택
 ma_layout = [
-    [sg.Text('', font=('gothic', 9))],
+    [sg.Text('이평선', font=('gothic', 9))],
     [sg.Text('1'), sg.Combo(values=ma_list, default_value=3, font=('gothic', 10), 
                             key='ma_1', enable_events=True)], 
     [sg.Text('2'), sg.Combo(values=ma_list, default_value=5, font=('gothic', 10), 
@@ -66,7 +77,7 @@ ma_score_layout = [
 
 # 이격도 종가와 각이평선들 사이 이격정도(%)
 seperation_ratio_layout = [
-    [sg.Text('seperation(%)', font=('gothic', 9))],
+    [sg.Text('이격도(%)', font=('gothic', 9))],
     [sg.Text('c/m1'), sg.Combo(values=score_list, default_value=5, font=('gothic', 10), 
                                 key='sep_cm1', enable_events=True)],
     [sg.Text('c/m2'), sg.Combo(values=score_list, default_value=10, font=('gothic', 10), 
@@ -123,7 +134,9 @@ date_layout = [
                 key='candle_size', enable_events=True),
         sg.Text('Open Time:'), 
         sg.Combo(values=open_times, default_value=open_times[0], 
-                key='open_time', enable_events=True)]
+                key='open_time', enable_events=True)],
+    [sg.Frame('Noise Filter', noise_layout, element_justification='left', 
+        title_color='yellow')]
 ]
 
 strategy_list = ['변동성돌파_0', '변동성돌파_1', '변동성돌파_2']

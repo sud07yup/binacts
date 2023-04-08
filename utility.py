@@ -27,8 +27,8 @@ values_list = [
 18    values['sep_score_1'], 
 19    values['sep_score_2'], 
 20    values['sep_score_3'], 
-21    values['sep_score_4']
-
+21    values['sep_score_4'],
+22    values['selected_noise']
 
 ]
 '''
@@ -125,16 +125,23 @@ def ma(df, row, ma_list):
 
 def make_data(df, values_list, switch):
     '''
-    switch = [values['long_switch'], values['short_switch'], values['ma_switch'], values['noise_switch']]
+    switch = [
+        values['long_switch'], 
+        values['short_switch'], 
+        values['ma_switch'], 
+        values['seperation_switch]
+        values['system_noise'], 
+        values['selected_noise]
+        ]
     '''
-    ma_list = values_list[4:10]
+    ma_list      = values_list[4:10]
     
-    ma_s_1 = values_list[10]
-    ma_s_2 = values_list[11]
-    ma_s_3 = values_list[12]
-    ma_s_4 = values_list[13]
+    ma_s_1       = values_list[10]
+    ma_s_2       = values_list[11]
+    ma_s_3       = values_list[12]
+    ma_s_4       = values_list[13]
 
-    sep_base_cm1  = values_list[14]
+    sep_base_cm1 = values_list[14]
     sep_base_cm2 = values_list[15]
     sep_base_cm3 = values_list[16]
     sep_base_cm4 = values_list[17]
@@ -144,11 +151,14 @@ def make_data(df, values_list, switch):
     sep_score_3  = values_list[20]
     sep_score_4  = values_list[21] 
 
-    long_switch   = switch[0]
-    short_switch  = switch[1]
-    ma_switch     = switch[2]
-    noise_switch  = switch[3]
-    sep_switch    = switch[4]
+    select_noise = values_list[22]
+
+    long_switch        = switch[0]
+    short_switch       = switch[1]
+    ma_switch          = switch[2]
+    seperation_switch  = switch[3]
+    sys_noise_switch   = switch[4]
+    sele_noise_switch  = switch[5]
         
     # base factors
     df['range'] = df.high - df.low
@@ -163,17 +173,22 @@ def make_data(df, values_list, switch):
     df = ma(df, 'noise', ma_list)
     
     # 이격도
-    seperation_cm1  = df.close.shift(1) / df.close_ma_1.shift(1) - 1
+    seperation_cm1 = df.close.shift(1) / df.close_ma_1.shift(1) - 1
     seperation_cm2 = df.close.shift(1) / df.close_ma_2.shift(1) - 1
     seperation_cm3 = df.close.shift(1) / df.close_ma_3.shift(1) - 1
     seperation_cm4 = df.close.shift(1) / df.close_ma_4.shift(1) - 1
 
 
-    # 진입가격 설정
-    df['l_target'] = df.open + df.range.shift(1) * df.l_break_ratio.shift(1)
-    df['s_target'] = df.open - df.range.shift(1) * df.s_break_ratio.shift(1)
+    ## 진입가격 설정
+    if sele_noise_switch == 1 and sys_noise_switch == 0:
+        df['l_target'] = df.open + df.range.shift(1) * select_noise
+        df['s_target'] = df.open - df.range.shift(1) * select_noise
 
-    # 배팅비율
+    else:
+        df['l_target'] = df.open + df.range.shift(1) * df.l_break_ratio.shift(1)
+        df['s_target'] = df.open - df.range.shift(1) * df.s_break_ratio.shift(1)
+
+    ## 배팅비율
     # 이평선 스코어 
     score_sum = ma_s_1 + ma_s_2 + ma_s_3 + ma_s_4
     ma_1_long_score  = np.where(df.close_ma_1.shift(1) <= df.close.shift(1), ma_s_1, 0)
