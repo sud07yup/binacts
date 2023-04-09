@@ -39,7 +39,8 @@ class Backtest():
             
 if __name__== '__main__':
     # Connect to the database file
-    conn = sqlite3.connect('C:\\coding\db\\binance_futures.db')
+    # conn = sqlite3.connect('C:\\coding\db\\binance_futures.db')
+    conn = sqlite3.connect("D:\\db\\binance_futures.db")
     cursor = conn.cursor()
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
     table_name  = [row[0] for row in cursor.fetchall()]
@@ -68,11 +69,14 @@ if __name__== '__main__':
                 values['ma_1'], values['ma_2'], values['ma_3'], 
                 values['ma_4'], values['ma_5'], values['ma_6'],
                 values['ma_score_1'], values['ma_score_2'], 
-                values['ma_score_3'], values['ma_score_4'], 
+                values['ma_score_3'], values['ma_score_4'],
+                values['ma_score_5'], values['ma_score_6'], 
                 values['sep_cm1'], values['sep_cm2'], 
-                values['sep_cm3'], values['sep_cm4'],
+                values['sep_cm3'], values['sep_cm4'], 
+                values['sep_cm5'], values['sep_cm6'],
                 values['sep_score_1'], values['sep_score_2'], 
-                values['sep_score_3'], values['sep_score_4'],
+                values['sep_score_3'], values['sep_score_4'], 
+                values['sep_score_5'], values['sep_score_6'],
                 values['aggression'], values['selected_noise']
             ]
                         
@@ -110,11 +114,14 @@ if __name__== '__main__':
             if values['sym'] == True:
                 # print(values['sym'])
                 table_name_list = table_name
-                 
+            
             else:
                 table_name_list = []
-                symbol_list = [values['sym1'], values['sym2'], values['sym3'], 
-                            values['sym4'], values['sym5'], values['sym6'],]
+                symbol_list = [
+                    values['sym1'], values['sym2'], values['sym3'], 
+                    values['sym4'], values['sym5'], values['sym6'],
+                ]
+                
                 for sym in symbol_list:
                     if sym != '':
                         s = f'{sym}USDT_1h'

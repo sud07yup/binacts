@@ -20,16 +20,22 @@ values_list = [
 11    values['ma_score_2'], 
 12    values['ma_score_3'], 
 13    values['ma_score_4'], 
-14    values['sep_cm1'], 
-15    values['sep_cm2'], 
-16    values['sep_cm3'], 
-17    values['sep_cm4'],
-18    values['sep_score_1'], 
-19    values['sep_score_2'], 
-20    values['sep_score_3'], 
-21    values['sep_score_4'],
-22    values['aggression'],
-23    values['selected_noise']
+14    values['ma_score_5'], 
+15    values['ma_score_6'], 
+16    values['sep_cm1'], 
+17    values['sep_cm2'], 
+18    values['sep_cm3'], 
+19    values['sep_cm4'],
+20    values['sep_cm5'],
+21    values['sep_cm6'],
+22    values['sep_score_1'], 
+23    values['sep_score_2'], 
+24    values['sep_score_3'], 
+25    values['sep_score_4'],
+26    values['sep_score_5'],
+27    values['sep_score_6'],
+28    values['aggression'],
+29    values['selected_noise']
 
 ]
 '''
@@ -81,6 +87,7 @@ def resample_df(df, candle_size, open_time, values_list, switch):
                 'taker_buy_base_asset_volume': 'sum', 
                 'taker_buy_quote_asset_volume': 'sum'
             }
+    
     dfs = []
     period = f'{candle_size}H'
     if open_time == 'All':
@@ -141,19 +148,25 @@ def make_data(df, values_list, switch):
     ma_s_2       = values_list[11]
     ma_s_3       = values_list[12]
     ma_s_4       = values_list[13]
+    ma_s_5       = values_list[14]
+    ma_s_6       = values_list[15]
 
-    sep_base_cm1 = values_list[14]
-    sep_base_cm2 = values_list[15]
-    sep_base_cm3 = values_list[16]
-    sep_base_cm4 = values_list[17]
+    sep_cm1      = values_list[16] / 100
+    sep_cm2      = values_list[17] / 100
+    sep_cm3      = values_list[18] / 100
+    sep_cm4      = values_list[19] / 100
+    sep_cm5      = values_list[20] / 100
+    sep_cm6      = values_list[21] / 100
 
-    sep_score_1  = values_list[18]
-    sep_score_2  = values_list[19]
-    sep_score_3  = values_list[20]
-    sep_score_4  = values_list[21] 
+    sep_s_1  = values_list[22]
+    sep_s_2  = values_list[23]
+    sep_s_3  = values_list[24]
+    sep_s_4  = values_list[25]
+    sep_s_5  = values_list[26]
+    sep_s_6  = values_list[27] 
 
-    aggression   = values_list[22]
-    select_noise = values_list[23]
+    aggression   = values_list[28] / 100
+    select_noise = values_list[29] / 100
 
     long_switch        = switch[0]
     short_switch       = switch[1]
@@ -161,26 +174,19 @@ def make_data(df, values_list, switch):
     seperation_switch  = switch[3]
     sys_noise_switch   = switch[4]
     sele_noise_switch  = switch[5]
-        
+    
     # base factors
     df['range'] = df.high - df.low
-    df['noise'] = (1 - abs(df.open - df.close) / df.range).round(decimals=3)
+    df['noise'] = aggression * (1 - abs(df.open - df.close) / df.range).round(decimals=3)
     
     # 돌파 계수 설정
-    df['l_break_ratio'] = df.noise * (1) # 전일 변동폭에 곱할 수: 노이즈에 뭘 곱할까? 고민 
-    df['s_break_ratio'] = df.noise * (1)
+    df['l_break_ratio'] = df.noise * aggression # 공격 정도를 곱함 default=1,(0~1) 낮아질 수록 진입을 빠르게  
+    df['s_break_ratio'] = df.noise * aggression
 
     # 이평선 만들기
     df = ma(df, 'close', ma_list)
     df = ma(df, 'noise', ma_list)
     
-    # 이격도
-    seperation_cm1 = df.close.shift(1) / df.close_ma_1.shift(1) - 1
-    seperation_cm2 = df.close.shift(1) / df.close_ma_2.shift(1) - 1
-    seperation_cm3 = df.close.shift(1) / df.close_ma_3.shift(1) - 1
-    seperation_cm4 = df.close.shift(1) / df.close_ma_4.shift(1) - 1
-
-
     ## 진입가격 설정
     if sele_noise_switch == 1 and sys_noise_switch == 0:
         df['l_target'] = df.open + df.range.shift(1) * select_noise
@@ -192,30 +198,40 @@ def make_data(df, values_list, switch):
 
     ## 배팅비율
     # 이평선 스코어 
-    score_sum = ma_s_1 + ma_s_2 + ma_s_3 + ma_s_4
+    ma_score_sum = ma_s_1 + ma_s_2 + ma_s_3 + ma_s_4
     ma_1_long_score  = np.where(df.close_ma_1.shift(1) <= df.close.shift(1), ma_s_1, 0)
     ma_2_long_score  = np.where(df.close_ma_2.shift(1) <= df.close.shift(1), ma_s_2, 0)
     ma_3_long_score  = np.where(df.close_ma_3.shift(1) <= df.close.shift(1), ma_s_3, 0)
     ma_4_long_score  = np.where(df.close_ma_4.shift(1) <= df.close.shift(1), ma_s_4, 0)
+    ma_5_long_score  = np.where(df.close_ma_5.shift(1) <= df.close.shift(1), ma_s_5, 0)
+    ma_6_long_score  = np.where(df.close_ma_6.shift(1) <= df.close.shift(1), ma_s_6, 0)
 
     ma_1_short_score = np.where(df.close_ma_1.shift(1) >= df.close.shift(1), ma_s_1, 0)
     ma_2_short_score = np.where(df.close_ma_2.shift(1) >= df.close.shift(1), ma_s_2, 0)
     ma_3_short_score = np.where(df.close_ma_3.shift(1) >= df.close.shift(1), ma_s_3, 0)
     ma_4_short_score = np.where(df.close_ma_4.shift(1) >= df.close.shift(1), ma_s_4, 0)
+    ma_5_short_score = np.where(df.close_ma_5.shift(1) >= df.close.shift(1), ma_s_5, 0)
+    ma_6_short_score = np.where(df.close_ma_6.shift(1) >= df.close.shift(1), ma_s_6, 0)
+
+    # 이격도
+    seperation_cm1 = df.close.shift(1) / df.close_ma_1.shift(1) - 1
+    seperation_cm2 = df.close.shift(1) / df.close_ma_2.shift(1) - 1
+    seperation_cm3 = df.close.shift(1) / df.close_ma_3.shift(1) - 1
+    seperation_cm4 = df.close.shift(1) / df.close_ma_4.shift(1) - 1
+    seperation_cm5 = df.close.shift(1) / df.close_ma_5.shift(1) - 1
+    seperation_cm6 = df.close.shift(1) / df.close_ma_6.shift(1) - 1
 
     # 이격도 스코어  -  수정필요
-    sep_1_long_score = np.where((seperation_cm1 <= float(sep_base_cm1)/100), sep_score_1, 0)
-    sep_2_long_score = np.where((seperation_cm2 <= float(sep_base_cm2)/100), sep_score_2, 0)
-    sep_3_long_score = np.where((seperation_cm3 <= float(sep_base_cm3)/100), sep_score_3, 0)
-    sep_4_long_score = np.where((seperation_cm4 <= float(sep_base_cm4)/100), sep_score_4, 0)
+    sep_score_sum = sep_s_1 + sep_s_2 + sep_s_3 + sep_s_4
+    sep_1_long_score = np.where(seperation_cm1 <= float(sep_cm1), sep_s_1, 0)
+    sep_2_long_score = np.where(seperation_cm2 <= float(sep_cm2), sep_s_2, 0)
+    sep_3_long_score = np.where(seperation_cm3 <= float(sep_cm3), sep_s_3, 0)
+    sep_4_long_score = np.where(seperation_cm4 <= float(sep_cm4), sep_s_4, 0)
+    sep_5_long_score = np.where(seperation_cm5 <= float(sep_cm5), sep_s_5, 0)
+    sep_6_long_score = np.where(seperation_cm6 <= float(sep_cm6), sep_s_6, 0)
 
-    df['ss'] = sep_1_long_score
-
-
-    long_bat_score_1    = (ma_1_long_score + ma_2_long_score + ma_3_long_score + ma_4_long_score) / score_sum
-    short_bat_score_1   = (ma_1_short_score + ma_2_short_score + ma_3_short_score + ma_4_short_score) / score_sum
-
-   
+    long_bat_rate_1  = (ma_1_long_score + ma_2_long_score + ma_3_long_score + ma_4_long_score) / ma_score_sum
+    short_bat_rate_1 = (ma_1_short_score + ma_2_short_score + ma_3_short_score + ma_4_short_score) / ma_score_sum
 
     
     # 실행 조건 

@@ -33,8 +33,8 @@ symbols_layout = [
 
 noise_layout = [
 
-    [sg.Checkbox('System Value', key='system_noise'), 
-    sg.Text('-Appli_Rate(%)'), sg.Combo(values=noise_list, default_value=100, font=('gothic', 10), key='aggression'),],
+    [sg.Checkbox('System Value', key='system_noise'), sg.Text('-Appli_Rate(%)'), 
+    sg.Combo(values=noise_list, default_value=100, font=('gothic', 10), key='aggression'),],
     [sg.Checkbox('Select Noise(%)', key='select_noise'), 
     sg.Combo(values=noise_list, default_value=50, font=('gothic', 10), key='selected_noise')],
 ]
@@ -70,9 +70,9 @@ ma_score_layout = [
     [sg.Text('4'), sg.Combo(values=score_list, default_value=5, font=('gothic', 10), 
                             key='ma_score_4', enable_events=True)], 
     [sg.Text('5'), sg.Combo(values=score_list, default_value=5, font=('gothic', 10), 
-                            key='ma_score_4', enable_events=True)], 
+                            key='ma_score_5', enable_events=True)], 
     [sg.Text('6'), sg.Combo(values=score_list, default_value=5, font=('gothic', 10), 
-                            key='ma_score_4', enable_events=True)],
+                            key='ma_score_6', enable_events=True)],
 ]
 
 # 이격도 종가와 각이평선들 사이 이격정도(%)
@@ -105,9 +105,9 @@ sep_score_layout = [
     [sg.Text('4'), sg.Combo(values=score_list, default_value=10, font=('gothic', 10), 
                             key='sep_score_4', enable_events=True)],
     [sg.Text('5'), sg.Combo(values=score_list, default_value=0, font=('gothic', 10), 
-                            key='sep_score_4', enable_events=True)],
+                            key='sep_score_5', enable_events=True)],
     [sg.Text('6'), sg.Combo(values=score_list, default_value=0, font=('gothic', 10), 
-                            key='sep_score_4', enable_events=True)],
+                            key='sep_score_6', enable_events=True)],
 ]
 
 # filter_layout = [
@@ -151,19 +151,19 @@ strategy_layout = [
 
 layout = [
     [sg.Frame('Time Set', date_layout, element_justification='center', 
-        title_color='yellow', size=(300,190)), 
+        title_color='yellow', size=(300,210)), 
     sg.Frame('Crypto Set', symbols_layout, element_justification='center', 
-        title_color='yellow', size=(90,190)), 
+        title_color='yellow', size=(90,210)), 
     sg.Frame('MA Set', ma_layout, element_justification='right', 
-        title_color='yellowgreen', size=(80,190)), 
+        title_color='yellowgreen', size=(80,210)), 
     sg.Frame('MA Score', ma_score_layout, element_justification='right', 
-        title_color='yellowgreen', size=(100,190)), 
+        title_color='yellowgreen', size=(100,210)), 
     sg.Frame('Seperation', seperation_ratio_layout, element_justification='right', 
-        title_color='darkgreen', size=(100,190)),
+        title_color='darkgreen', size=(100,210)),
     sg.Frame('Sep Score', sep_score_layout, element_justification='right', 
-        title_color='darkgreen', size=(100,190)),
+        title_color='darkgreen', size=(100,210)),
     sg.Frame('Strategy', strategy_layout, element_justification='left', 
-        title_color='yellowgreen', size=(180,190)),],
+        title_color='yellowgreen', size=(180,210)),],
     [sg.Button('Run Backtest'), sg.Text('>>>  ', key='timer', font=('gothic', 12))],
     #[sg.Output(size=(200, 20))]
 ]
